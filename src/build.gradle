@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'com.github.pengrad:java-telegram-bot-api:6.0.1'
+    implementation 'com.github.lexst64:lingvo-live-api:v1.0.1-alpha'
+    implementation 'com.github.stateless4j:stateless4j:2.6.0'
+}
+
+test {
+    useJUnitPlatform()
+}
