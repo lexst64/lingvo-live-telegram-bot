@@ -1,3 +1,4 @@
 rootProject.name = 'LingvoLiveTelegramBot'
 include 'src'
+include 'src'
 
