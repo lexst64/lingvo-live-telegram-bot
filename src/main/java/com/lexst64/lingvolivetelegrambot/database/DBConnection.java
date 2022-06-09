@@ -3,7 +3,6 @@ package com.lexst64.lingvolivetelegrambot.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 
 public class DBConnection {
@@ -36,10 +35,6 @@ public class DBConnection {
 
     public boolean execute(String query) throws SQLException {
         return currentConnection.createStatement().execute(query);
-    }
-
-    public ResultSet executeQuery(String query) throws SQLException {
-        return currentConnection.createStatement().executeQuery(query);
     }
 
     public PreparedStatement getPreparedStatement(String query) throws SQLException {

@@ -1,7 +1,10 @@
 package com.lexst64.lingvolivetelegrambot.commands;
 
 import com.lexst64.lingvoliveapi.lang.Lang;
+import com.lexst64.lingvoliveapi.lang.LangPair;
 import com.lexst64.lingvolivetelegrambot.database.DBManager;
+import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestDstLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestSrcLangQueryHandler;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -27,17 +30,16 @@ public class LangCommand extends BotCommand {
     public InlineKeyboardMarkup createKeyboardMarkup(long userId) {
         List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
 
-        Lang srcLang = dbManager.getSrcLang(userId);
-        Lang dstLang = dbManager.getDstLang(userId);
+        LangPair langPair = dbManager.getLangPair(userId);
 
         Collections.addAll(keyboardRow,
                 InlineKeyboardButton.builder()
-                        .text(srcLang.toString())
-                        .callbackData("srcLang")
+                        .text(langPair.getSrcLang().toString())
+                        .callbackData(SuggestSrcLangQueryHandler.REGEX)
                         .build(),
                 InlineKeyboardButton.builder()
-                        .text(dstLang.toString())
-                        .callbackData("dstLang")
+                        .text(langPair.getDstLang().toString())
+                        .callbackData(SuggestDstLangQueryHandler.REGEX)
                         .build()
         );
 
