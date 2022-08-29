@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.providers.exceptions;
+package com.lexst64.lingvolivetelegrambot.api.exceptions;
 
 public class ContextsNotFoundException extends RuntimeException {
     public ContextsNotFoundException(String text) {

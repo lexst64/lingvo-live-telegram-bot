@@ -2,8 +2,8 @@ package com.lexst64.lingvolivetelegrambot.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class DBConnection {
 
@@ -47,6 +47,7 @@ public class DBConnection {
 
     /**
      * Finish a transaction in database and commit changes
+     *
      * @throws SQLException If a rollback fails
      */
     public void commitTransaction() throws SQLException {

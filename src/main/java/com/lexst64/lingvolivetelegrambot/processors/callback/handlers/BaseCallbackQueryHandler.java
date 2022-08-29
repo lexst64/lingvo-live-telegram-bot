@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.processors.callbackhandlers;
+package com.lexst64.lingvolivetelegrambot.processors.callback.handlers;
 
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;

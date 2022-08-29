@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.processors.callbackhandlers;
+package com.lexst64.lingvolivetelegrambot.processors.callback.handlers;
 
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -9,7 +9,7 @@ public interface CallbackQueryHandler {
      * Verifies the provided callback query before processing it
      *
      * @return true if callback query is valid or false if it's not
-     * */
+     */
     boolean verifyCallbackQuery(CallbackQuery callbackQuery);
 
     /**
@@ -25,6 +25,6 @@ public interface CallbackQueryHandler {
     /**
      * @return regex string that is used for verifying callback query data
      * in implemented verifyCallbackQuery() method
-     * */
+     */
     String getRegex();
 }

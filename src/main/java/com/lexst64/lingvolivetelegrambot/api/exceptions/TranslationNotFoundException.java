@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.providers.exceptions;
+package com.lexst64.lingvolivetelegrambot.api.exceptions;
 
 public class TranslationNotFoundException extends RuntimeException {
     public TranslationNotFoundException(String text) {

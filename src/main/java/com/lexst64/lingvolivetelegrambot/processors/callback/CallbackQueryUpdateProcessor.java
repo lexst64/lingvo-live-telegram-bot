@@ -1,33 +1,30 @@
-package com.lexst64.lingvolivetelegrambot.processors;
+package com.lexst64.lingvolivetelegrambot.processors.callback;
 
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.CallbackQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.ContextQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestDstLangQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestSrcLangQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.submitters.SubmitDstLangQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.submitters.SubmitSrcLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.BaseNonCommandUpdateProcessor;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.CallbackQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.context.ContextQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.submitters.SubmitDstLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.submitters.SubmitSrcLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestDstLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestSrcLangQueryHandler;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class CallbackQueryUpdateProcessor extends BaseUpdateProcessor {
+public class CallbackQueryUpdateProcessor extends BaseNonCommandUpdateProcessor {
 
     private final CallbackQueryHandler[] callbackQueryHandlers;
 
-    public CallbackQueryUpdateProcessor(CallbackQueryHandler... callbackQueryHandlers) {
-        this.callbackQueryHandlers = callbackQueryHandlers;
-    }
-
     public CallbackQueryUpdateProcessor() {
-        this(
+        this.callbackQueryHandlers = new CallbackQueryHandler[]{
                 new ContextQueryHandler(),
                 new SuggestSrcLangQueryHandler(),
                 new SubmitSrcLangQueryHandler(),
                 new SuggestDstLangQueryHandler(),
                 new SubmitDstLangQueryHandler()
-        );
+        };
     }
 
     private void processInvalidQuery(CallbackQuery callbackQuery, AbsSender absSender) {

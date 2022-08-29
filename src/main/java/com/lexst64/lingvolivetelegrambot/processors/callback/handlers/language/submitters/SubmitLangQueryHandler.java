@@ -1,12 +1,12 @@
-package com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.submitters;
+package com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.submitters;
 
 import com.lexst64.lingvoliveapi.lang.Lang;
 import com.lexst64.lingvoliveapi.lang.LangPair;
 import com.lexst64.lingvoliveapi.lang.exceptions.LangNotFoundException;
 import com.lexst64.lingvolivetelegrambot.database.DBManager;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.BaseCallbackQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestDstLangQueryHandler;
-import com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.suggesters.SuggestSrcLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.BaseCallbackQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestDstLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestSrcLangQueryHandler;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
+abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
 
     public final static String SPLITTER = ":";
     public final static int CALLBACK_TEXT_INDEX = 1;
@@ -41,14 +41,6 @@ public abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
                 .text(getMessageText())
                 .replyMarkup(createKeyboardMarkup(userId))
                 .build();
-    }
-
-    private void sendEditMessageText(CallbackQuery callbackQuery, AbsSender absSender) {
-        try {
-            absSender.execute(createEditMessageText(callbackQuery));
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
     }
 
     private InlineKeyboardButton createKeyboardButton(String buttonText, String callbackData) {
@@ -77,11 +69,11 @@ public abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
         return Lang.getLangByCode(langCode);
     }
 
-    private void answerCallbackQueryOnError(String callbackQueryId, String message, AbsSender absSender) {
+    private void answerCallbackQueryOnError(String callbackQueryId, AbsSender absSender) {
         AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
                 .callbackQueryId(callbackQueryId)
                 .showAlert(true)
-                .text(message)
+                .text("Something went wrong. Please, try again")
                 .build();
         try {
             absSender.execute(answerCallbackQuery);
@@ -89,18 +81,6 @@ public abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
             e.printStackTrace();
         }
     }
-
-    private void answerCallbackQueryOnSuccess(String callbackQueryId, AbsSender absSender) {
-        try {
-            absSender.execute(new AnswerCallbackQuery(callbackQueryId));
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected abstract String getMessageText();
-
-    protected abstract boolean updateLangPair(long userId, Lang lang);
 
     @Override
     protected void processQuery(CallbackQuery callbackQuery, AbsSender absSender) {
@@ -111,20 +91,25 @@ public abstract class SubmitLangQueryHandler extends BaseCallbackQueryHandler {
         try {
             lang = retrieveLang(callbackQuery.getData());
         } catch (LangNotFoundException e) {
-            answerCallbackQueryOnError(callbackQueryId, e.getMessage(), absSender);
+            answerCallbackQueryOnError(callbackQueryId, absSender);
             return;
         }
 
         boolean isUpdated = updateLangPair(userId, lang);
         if (!isUpdated) {
-            answerCallbackQueryOnError(
-                    callbackQueryId,
-                    "error occurred while trying to update lang pair",
-                    absSender
-            );
+            answerCallbackQueryOnError(callbackQueryId, absSender);
+            return;
         }
 
-        answerCallbackQueryOnSuccess(callbackQueryId, absSender);
-        sendEditMessageText(callbackQuery, absSender);
+        try {
+            absSender.execute(new AnswerCallbackQuery(callbackQueryId));
+            absSender.execute(createEditMessageText(callbackQuery));
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
+
+    abstract String getMessageText();
+
+    abstract boolean updateLangPair(long userId, Lang lang);
 }

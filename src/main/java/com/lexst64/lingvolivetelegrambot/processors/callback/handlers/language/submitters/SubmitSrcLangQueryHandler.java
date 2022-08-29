@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.processors.callbackhandlers.language.submitters;
+package com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.submitters;
 
 import com.lexst64.lingvoliveapi.lang.Lang;
 import com.lexst64.lingvoliveapi.lang.LangPair;
@@ -28,7 +28,7 @@ public class SubmitSrcLangQueryHandler extends SubmitLangQueryHandler {
     }
 
     @Override
-    protected boolean updateLangPair(long userId, Lang srcLang) {
+    boolean updateLangPair(long userId, Lang srcLang) {
         LangPair langPair;
         try {
             Lang dstLang = dbManager.getDstLang(userId);
@@ -40,7 +40,7 @@ public class SubmitSrcLangQueryHandler extends SubmitLangQueryHandler {
     }
 
     @Override
-    protected String getMessageText() {
+    String getMessageText() {
         return "Source language updated!";
     }
 

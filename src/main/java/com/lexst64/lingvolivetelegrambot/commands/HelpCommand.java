@@ -1,6 +1,5 @@
 package com.lexst64.lingvolivetelegrambot.commands;
 
-import com.lexst64.lingvolivetelegrambot.providers.HelpMessageProvider;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -16,18 +15,19 @@ public class HelpCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        long chatId = chat.getId();
-
         try {
-            absSender.execute(new HelpMessageProvider().provide(chatId));
-        } catch (TelegramApiException e) {
-            sendErrorMessage(absSender, chatId);
-        }
-    }
+            String text = """
+                    Hi! I'm a translator bot that can translate words and phrases.
+                    You can change your language pair using /lang command.
+                    Just send any word in source language and I'm going to translate it
+                    to destination language
 
-    void sendErrorMessage(AbsSender absSender, Long chatId) {
-        try {
-            absSender.execute(new SendMessage(chatId.toString(), "broken down"));
+                    Here's my commands:
+                    - /lang
+                    - /context [word or phrase]
+                    - /help
+                                        """;
+            absSender.execute(new SendMessage(chat.getId().toString(), text));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

@@ -3,10 +3,10 @@ package com.lexst64.lingvolivetelegrambot.providers;
 import com.lexst64.lingvoliveapi.response.GetWordListResponse;
 import com.lexst64.lingvoliveapi.type.WordListItem;
 import com.lexst64.lingvolivetelegrambot.api.LingvoLiveApi;
-import com.lexst64.lingvolivetelegrambot.providers.exceptions.ContextsNotFoundException;
+import com.lexst64.lingvolivetelegrambot.api.exceptions.ContextsNotFoundException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-public class ContextMessageProvider {
+public class ContextMessageProvider implements SendMessageProvider {
 
     private static final String INDENT = "\n\n";
     private static final String LF = "\n";
@@ -28,11 +28,13 @@ public class ContextMessageProvider {
         return stringBuilder.toString();
     }
 
-    public SendMessage provide(long chatId, long userId, String text) throws ContextsNotFoundException {
-        GetWordListResponse response = lingvoLiveApi.requestWordList(userId, text);
-        if (response.isOk()) {
-            return new SendMessage(Long.toString(chatId), getContexts(response));
+    @Override
+    public SendMessage provide(long chatId, long userId, String text) {
+        try {
+            GetWordListResponse res = lingvoLiveApi.requestContexts(userId, text);
+            return new SendMessage(Long.toString(chatId), getContexts(res));
+        } catch (ContextsNotFoundException e) {
+            return null;
         }
-        throw new ContextsNotFoundException(text);
     }
 }

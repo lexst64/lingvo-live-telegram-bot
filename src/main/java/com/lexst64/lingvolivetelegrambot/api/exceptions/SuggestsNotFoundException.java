@@ -1,4 +1,4 @@
-package com.lexst64.lingvolivetelegrambot.providers.exceptions;
+package com.lexst64.lingvolivetelegrambot.api.exceptions;
 
 public class SuggestsNotFoundException extends RuntimeException {
     public SuggestsNotFoundException(String text) {
