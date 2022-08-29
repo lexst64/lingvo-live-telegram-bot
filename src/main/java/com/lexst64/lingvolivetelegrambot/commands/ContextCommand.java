@@ -1,8 +1,7 @@
 package com.lexst64.lingvolivetelegrambot.commands;
 
-import com.lexst64.lingvoliveapi.lang.Lang;
-import com.lexst64.lingvolivetelegrambot.api.ContextDataProvider;
-import com.lexst64.lingvolivetelegrambot.database.DBManager;
+import com.lexst64.lingvolivetelegrambot.providers.ContextMessageProvider;
+import com.lexst64.lingvolivetelegrambot.providers.SendMessageProvider;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -12,37 +11,29 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class ContextCommand extends BotCommand {
 
-    private final ContextDataProvider dataProvider;
-    private final DBManager dbManager;
+    private static final String ARGS_DELIMITER = " ";
+
+    private final SendMessageProvider contextDataProvider;
 
     public ContextCommand() {
         super("context", "context for passed word/phrase");
-        dataProvider = new ContextDataProvider();
-        dbManager = DBManager.getInstance();
+        contextDataProvider = new ContextMessageProvider();
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        String chatId = chat.getId().toString();
-
-        if (arguments.length == 0) {
-            try {
-                absSender.execute(new SendMessage(chatId, "can't process command without args"));
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-            return;
-        }
-
-        String text = String.join(" ", arguments);
-
-        long userId = user.getId();
-        Lang srcLang = dbManager.getSrcLang(userId);
-        Lang dstLang = dbManager.getDstLang(userId);
-
-        String data = dataProvider.provide(text, srcLang, dstLang);
         try {
-            absSender.execute(new SendMessage(chat.getId().toString(), data));
+            SendMessage sendMessage;
+            if (arguments.length == 0) {
+                sendMessage = new SendMessage(chat.getId().toString(), "can't find contexts without args");
+            } else {
+                String text = String.join(ARGS_DELIMITER, arguments);
+                sendMessage = contextDataProvider.provide(chat.getId(), user.getId(), text);
+                if (sendMessage == null) {
+                    sendMessage = new SendMessage(chat.getId().toString(), "contexts not found for '" + text + "'");
+                }
+            }
+            absSender.execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

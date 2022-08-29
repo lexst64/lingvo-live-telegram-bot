@@ -1,11 +1,7 @@
-package com.lexst64.lingvolivetelegrambot.processors.callback.language.requesters;
+package com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters;
 
 import com.lexst64.lingvoliveapi.lang.Lang;
-import com.lexst64.lingvoliveapi.lang.LangPair;
-import com.lexst64.lingvoliveapi.lang.LangType;
-import com.lexst64.lingvolivetelegrambot.database.DBManager;
-import com.lexst64.lingvolivetelegrambot.processors.callback.CallbackQueryProcessor;
-import com.lexst64.lingvolivetelegrambot.processors.callback.ErrorProcessor;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.BaseCallbackQueryHandler;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -16,29 +12,13 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public abstract class LangQueryRequester implements CallbackQueryProcessor {
+abstract class SuggestLangQueryHandler extends BaseCallbackQueryHandler {
 
-    private final DBManager dbManager;
-    private final LangType langType;
+    public final static String SPLITTER = ":";
 
-    LangQueryRequester() {
-        if (this instanceof SrcLangQueryRequester) {
-            this.langType = LangType.SRC_LANG;
-        } else {
-            this.langType = LangType.DST_LANG;
-        }
-        dbManager = DBManager.getInstance();
-    }
-
-    protected void processQuery(CallbackQuery callbackQuery, AbsSender absSender) throws TelegramApiException {
-        absSender.execute(crateEditMessageText(callbackQuery));
-        absSender.execute(new AnswerCallbackQuery(callbackQuery.getId()));
-    }
-
-    private EditMessageText crateEditMessageText(CallbackQuery callbackQuery) {
+    private EditMessageText createEditMessageText(CallbackQuery callbackQuery) {
         Message message = callbackQuery.getMessage();
         Lang[] languages = getLanguages(callbackQuery.getFrom().getId());
         return EditMessageText.builder()
@@ -47,22 +27,6 @@ public abstract class LangQueryRequester implements CallbackQueryProcessor {
                 .chatId(message.getChatId().toString())
                 .replyMarkup(createKeyboardMarkup(languages))
                 .build();
-    }
-
-    private String getMessageText() {
-        return "Choose the " + (langType == LangType.SRC_LANG ? "source language" : "destination language");
-    }
-
-    private String getCallbackData(Lang lang) {
-        return langType == LangType.SRC_LANG ? "srcLang:" + lang.getCode() : "dstLang:" + lang.getCode();
-    }
-
-    private Lang[] getLanguages(long userId) {
-        if (langType == LangType.SRC_LANG) {
-            return LangPair.getSrcLangs();
-        }
-        Lang srcLang = dbManager.getSrcLang(userId);
-        return Arrays.stream(LangPair.findPairsBySrcLang(srcLang)).map(LangPair::getDstLang).toArray(Lang[]::new);
     }
 
     private InlineKeyboardMarkup createKeyboardMarkup(Lang[] languages) {
@@ -86,4 +50,20 @@ public abstract class LangQueryRequester implements CallbackQueryProcessor {
 
         return markupBuilder.build();
     }
+
+    @Override
+    protected void processQuery(CallbackQuery callbackQuery, AbsSender absSender) {
+        try {
+            absSender.execute(new AnswerCallbackQuery(callbackQuery.getId()));
+            absSender.execute(createEditMessageText(callbackQuery));
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    abstract String getMessageText();
+
+    abstract Lang[] getLanguages(long userId);
+
+    abstract String getCallbackData(Lang lang);
 }

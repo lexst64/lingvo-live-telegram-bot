@@ -1,6 +1,7 @@
 package com.lexst64.lingvolivetelegrambot.database;
 
 import com.lexst64.lingvoliveapi.lang.Lang;
+import com.lexst64.lingvoliveapi.lang.LangPair;
 import com.lexst64.lingvoliveapi.lang.LangType;
 
 import javax.validation.constraints.NotNull;
@@ -30,14 +31,14 @@ public class DBManager {
         }
     }
 
-    public boolean addNewUser(long userId, int srcLang, int dstLang) {
+    public boolean createNewUser(long userId, LangPair langPair) {
         int updatedRows = 0;
         try {
             PreparedStatement statement = connection
                     .getPreparedStatement("INSERT OR REPLACE INTO Users (user_id, src_lang, dst_lang) VALUES(?, ?, ?)");
             statement.setLong(1, userId);
-            statement.setInt(2, srcLang);
-            statement.setInt(3, dstLang);
+            statement.setInt(2, langPair.getSrcLang().getCode());
+            statement.setInt(3, langPair.getDstLang().getCode());
             updatedRows = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -45,12 +46,38 @@ public class DBManager {
         return updatedRows > 0;
     }
 
-    public boolean updateSrcLang(long userId, @NotNull Lang srcLang) {
+    public LangPair getLangPair(long userId) {
+        return LangPair.getPair(getSrcLang(userId), getDstLang(userId));
+    }
+
+    public boolean updateLangPair(long userId, LangPair langPair) {
+        return updateSrcLang(userId, langPair.getSrcLang()) && updateDstLang(userId, langPair.getDstLang());
+    }
+
+    private boolean updateSrcLang(long userId, @NotNull Lang srcLang) {
         return updateLang(userId, LangType.SRC_LANG, srcLang.getCode());
     }
 
-    public boolean updateDstLang(long userId, @NotNull Lang dstLang) {
+    private boolean updateDstLang(long userId, @NotNull Lang dstLang) {
         return updateLang(userId, LangType.DST_LANG, dstLang.getCode());
+    }
+
+    private boolean updateLang(long userId, @NotNull LangType langType, int langCode) {
+        int updatedRows = 0;
+        try {
+            PreparedStatement statement;
+            if (langType == LangType.SRC_LANG) {
+                statement = connection.getPreparedStatement("UPDATE Users SET src_lang = ? WHERE user_id = ?");
+            } else {
+                statement = connection.getPreparedStatement("UPDATE Users SET dst_lang = ? WHERE user_id = ?");
+            }
+            statement.setInt(1, langCode);
+            statement.setLong(2, userId);
+            updatedRows = statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return updatedRows > 0;
     }
 
     public Lang getSrcLang(long userId) {
@@ -79,24 +106,6 @@ public class DBManager {
             e.printStackTrace();
         }
         return langCode;
-    }
-
-    private boolean updateLang(long userId, @NotNull LangType langType, int langCode) {
-        int updatedRows = 0;
-        try {
-            PreparedStatement statement;
-            if (langType == LangType.SRC_LANG) {
-                statement = connection.getPreparedStatement("UPDATE Users SET src_lang = ? WHERE user_id = ?");
-            } else {
-                statement = connection.getPreparedStatement("UPDATE Users SET dst_lang = ? WHERE user_id = ?");
-            }
-            statement.setInt(1, langCode);
-            statement.setLong(2, userId);
-            updatedRows = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return updatedRows > 0;
     }
 
     public static DBManager getInstance() {

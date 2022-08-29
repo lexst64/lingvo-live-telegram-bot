@@ -1,7 +1,9 @@
 package com.lexst64.lingvolivetelegrambot.commands;
 
-import com.lexst64.lingvoliveapi.lang.Lang;
+import com.lexst64.lingvoliveapi.lang.LangPair;
 import com.lexst64.lingvolivetelegrambot.database.DBManager;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestDstLangQueryHandler;
+import com.lexst64.lingvolivetelegrambot.processors.callback.handlers.language.suggesters.SuggestSrcLangQueryHandler;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -27,17 +29,16 @@ public class LangCommand extends BotCommand {
     public InlineKeyboardMarkup createKeyboardMarkup(long userId) {
         List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
 
-        Lang srcLang = dbManager.getSrcLang(userId);
-        Lang dstLang = dbManager.getDstLang(userId);
+        LangPair langPair = dbManager.getLangPair(userId);
 
         Collections.addAll(keyboardRow,
                 InlineKeyboardButton.builder()
-                        .text(srcLang.toString())
-                        .callbackData("srcLang")
+                        .text(langPair.getSrcLang().toString())
+                        .callbackData(SuggestSrcLangQueryHandler.REGEX)
                         .build(),
                 InlineKeyboardButton.builder()
-                        .text(dstLang.toString())
-                        .callbackData("dstLang")
+                        .text(langPair.getDstLang().toString())
+                        .callbackData(SuggestDstLangQueryHandler.REGEX)
                         .build()
         );
 
@@ -46,10 +47,10 @@ public class LangCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        SendMessage request = new SendMessage(chat.getId().toString(), "Change lang:");
-        request.setReplyMarkup(createKeyboardMarkup(user.getId()));
+        SendMessage sendMessage = new SendMessage(chat.getId().toString(), "Change lang:");
+        sendMessage.setReplyMarkup(createKeyboardMarkup(user.getId()));
         try {
-            absSender.execute(request);
+            absSender.execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
